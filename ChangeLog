@@ -1,0 +1,50 @@
+2003-02-17  Joe Laffey  <software@laffeycomputer.com>
+
+	* spinner.c: Fixed the real problem (open tty fds) that prevented
+	termination on logout from linux sshd. Added signal handlers to the
+	NullLoop. Added xterm, screen and ansi to the acceptable TERM types.
+	
+	*usage.c: Added info for -l switch.
+	
+	* README: Updated usage info for the -l switch. Added notes about
+	the -l switch. Updated beta testers list.
+	
+	
+2003-01-31  Joe Laffey  <software@laffeycomputer.com>
+
+	* spinner.c: Fixed signal handling that prevented termination on
+	logout. 
+	
+	
+2003-01-30  Joe Laffey  <software@laffeycomputer.com>
+
+	* README: Added beta testers.
+
+	* AUTHORS: Added beta testers.
+	
+	* spinner.h: Included <sys/types.h> for pid_t typedef. (bug reported
+	by Michael Hostbaek <mich@freebsdcluster.org>).
+
+	* spinner.c: Called tcdrain() on TTY in NullLoop().
+
+2003-01-29  Joe Laffey  <software@laffeycomputer.com>
+
+	* README: Added usage info for the -n switch. Typo/grammar fixes.
+
+	* usage.c: Added usage info for the -n switch.
+	
+	* spinner.c: Minor code cleanup (var names).
+	
+
+2003-01-28  Joe Laffey  <software@laffeycomputer.com>
+
+	* automake.am: Added autoconf/automake support
+
+	* spinner.c: cleaned up code. Better signal handling support for -n
+	switch to only send null charcters. Moved usage/license into usage.c.
+	Broke header out into spinner.h and usage.h. Added checks for setuid
+	and setgid modes. Added timeout to opening the tty. Positively
+	terminate strings. Pull HOME from /etc/passwd instead of the env var.
+	Removed writing pid file to current dir. Terminal is now drained 
+	before and after each write.
+	

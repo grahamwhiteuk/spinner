@@ -1,0 +1,282 @@
+---------------------------------------------------
+spinner 1.2 by Joe Laffey, LAFFEY Computer Imaging.
+---------------------------------------------------
+Doc: $Revision: 1.5 $
+
+Visit http://www.laffeycomputer.com/ for updates.
+
+
+	This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+-------------
+WHAT IS IT?
+-------------
+
+Spinner is an anti-idle program that displays a little "spinning" ASCII 
+character in the top left corner of your terminal. To make this effect it 
+cycles through punctuation marks like this " - \ | / - \ | / ... " (try it to
+see). By default the character is drawn in inverse video (or your terminal's
+equivalent). But you can turn this off with the -i switch. In spinner mode 
+Spinner supports any terminal capable of handling VT100 style escape codes. In
+null mode (-n switch) Spinner supports any terminal. In null mode there is no
+visible output, and Spinner will not interfere with your terminal or
+scrollback. If you find the little spinner in the top left corner to be
+distracting use null mode. (-n switch).
+
+Spinner is useful for keeping telnet and ssh links from dropping due to
+inactivity. Many firewalls, and some ISPs drop connections when they are
+perceived as idle. By having spinner running the server is constantly
+sending a tiny amount of data over the link, preserving the connection. As of
+version 1.2 Spinner can also be activated with the -n switch so that, instead
+of displaying a spinner, it simply sends out a periodic null character to the
+terminal. This achieves the same anti-idle benefit without disturbing your
+screen. But it lacks the coolness factor of a little spinner in the corner
+of the terminal...
+
+Thus (for search engines) Spinner is an anti-idle, timeout preventing,
+background daemon process for unix variants including linux. Spinner is
+known to compile and work properly under NetBSD 1.5 and 1.6, Mac OS X 10.2,
+linux 2.2 and 2.4.
+
+Spinner also has a (mainly fun) mode I like to call "Ghost in the Machine"
+mode. In this mode you can use spinner to write the spinner character to
+ANY tty, not just your own. This requires adequate permissions, of course.
+(see below)
+
+
+-----------------
+HOW DO I USE IT?
+-----------------
+
+Basic summary: (spinner -h)
+
+
+Usage:  spinner[-IntTuvl<path>[f<path>|F][p<prio>|P]] [delay]
+        -f   <path> Set pid file path (default is ~/.spinner.pid)
+        -F   Do *not* create a pid file
+        -I   Do *not* use inverse video for spinner
+        -l   <path> Set log file path (for debugging). Off by default.
+        -L   Display the license
+        -n   Send only null characters. (No visible output.)
+        -p   <priority> Specify process priority to use
+        -P   Do *not* change process priority (default is to make nice)
+        -r   Reset term on quit (Use if you get left in inverse a lot.)
+        -R   Reset the term and Quit immediately. (nothing else)
+        -t   <tty path> Specify path of TTY to which to write
+        -T   Ignore incompatible TERM environment var setting
+        -u   Delay is in microseconds instead of seconds
+        -v   Verbose mode (lots of output)
+Returns: 0 on success, non-zero on failure.
+Launches into the background on success.
+Use: kill `cat <pidfile>` to stop.
+
+
+
+----------------
+IMPORTANT INFO   <--read this
+----------------
+
+* IN ORDER FOR SPINNER TO PREVENT IDLE CONNECTIONS YOU MUST RUN IT ON THE
+SERVER. If you run Spinner on your client the data is not sent over the
+wire. It is only drawn locally. So you must run Spinner on the remote
+machine to keep the data coming to your terminal over the wire. If you do
+not have root access on the remote machine you can still use Spinner.
+Compile Spinner with "./configure --prefix=</your/bin/dir> && make install". 
+You can then launch Spinner from your .login file or .tcshrc / .profile
+file if you wish.
+
+* Spinner is a daemon process (also known as a background process). When
+you start spinner it will launch into the background as not to interfere
+much with your foreground jobs. By default Spinner creates a pid (process 
+id) file called ".spinner.pid" in your home directory. (You may use the -f
+or -F switches to modify this behavior.) Note this pid file has a "."
+character in front so you will need to use ls -a to see it in a listing.
+You can use this file to easily kill Spinner with the command:
+
+   kill `cat ~/.spinner.pid`
+   
+Note that those are backticks (top left key below ESC, same key with ~).
+Of course you can also just find Spinner in your process list and kill
+it manually that way. Spinner's pid file is NOT a lock file. It will be
+overwritten every time you launch a copy of Spinner. So if you have
+multiple spinners running you will have to kill them manually.
+
+Spinner should commit suicide (i.e. quit) if the tty to which it is 
+writing is no longer active. Sometimes, if you start Spinner writing
+to another tty when that tty is not active to begin with Spinner will
+not quit. (Anyone know why?? Tell me.)
+
+* Since Spinner draws to the terminal it is possible (and likely) that
+the spinner character will end up in the terminal's scrollback. To
+reduce this annoyance you can use a long delay. As of version 1.2 you may
+opt to use the -n switch to cause spinner to send only null characters,
+instead of the spinning cursor. If you do not use -n you may also kill
+Spinner with the STOP signal (kill -STOP `cat ~/.spinner.pid`) and
+then continue it after you get your scrollback via the CONT signal 
+(kill -CONT `cat ~/.spinner.pid`).
+
+* Spinner may interfere with the display of mouse selections. If you drag 
+out a selection the highlighted text may become unhighlighted as sooner
+as Spinner draws to the terminal. Typically the contents of the paste 
+buffer still remain, however. So even though you lose the highlighting 
+you can still paste the text that you selected in the usual fashion.
+Again, as of version 1.2 you may opt to use the -n switch to cause 
+Spinner to only send null characters to the screen (which do not show up).
+
+* At startup spinner checks to be sure your TERM environment variable
+is set to "vt100" or "vt102". It only checks for these since these are
+the only terminal types that I KNOW will accept the vt100 escape codes
+(to move the cursor, inverse video, etc.) Spinner works perfectly
+well in every terminal I have tried it in (including GNU screen, eterm,
+xterm, aterm, etc.) If you get the message about your terminal not
+being "vt100" or "vt102" simply invoke Spinner with the -T switch. This
+forces Spinner to ignore the TERM setting. Note that if you use spinner
+on a dumb terminal, or any other terminal that does not support the
+escape codes you will see a lot garbage characters. Just stop Spinner
+and get a real terminal! If you find this check annoying, or think
+it should go away let me know. Note that if you use the -n switch Spinner
+will not check the terminal type at all, as it is not attempting to move
+the cursor, change inverse modes, etc.
+
+* Note that if you would like to use Spinner in conjunction with the GNU
+screen program (one of the world's coolest programs, screen is a 
+"terminal multiplexer" allowing multiple virtual terminals in a single
+terminal window, switching between them, detaching and resuming screens
+both local and remote, etc.) you will want to start Spinner *BEFORE* you
+start screen. Otherwise Spinner will end up in one of screen's virtual
+terminals, which means that it may not be on the real terminal all the
+time. This could lead to an idle timeout, which is exactly what Spinner
+was coded to prevent. You may also be able to determine your parent
+tty (the original tty from which you invoked screen), and have Spinner 
+write to that tty using the -t switch. (This would let you invoke
+Spinner in such a way that it would write to the parent terminal even
+though you launched Spinner from within screen.
+
+* In normal operation (delay >= 2 sec) Spinner functions well with most
+terminals / emulators. However, if you switch to microsecond mode for 
+the delay (-u) and use lower delays it is possible that your terminal
+will become somewhat garbled. You will notice that parts of the screen
+that shouldn't be are displayed in inverse text, or text is in the wrong
+place, etc. Setting a higher delay will normally make this issue
+non-existent. Note that "Terminal.app" under Mac OSX seems more prone to
+do this. Gnome term and eterm, etc seem immune. **NOTE: In version 1.2
+the code was reworked to all but eliminate this. If you encounter this
+issue, please send me an email with your system info. Since
+when using the -n switch Spinner does not send printable characters you will
+not experience this problem at all.
+
+* If you use an extremely low delay on a slow link, or use a slow-drawing
+terminal, be prepared for Spinner to slow your terminal down. I would say,
+"Don't do that!" Spinner is coded to be very efficient in its main loop.
+Only one write statement and one check to be sure the tty is active per
+iteration. Since Spinner is meant as an anti-idle tool you will most
+likely keep the delay high (but less than 30 sec or so depending upon
+what it is that is timing out your connection to begin with).
+
+* By default Spinner will set its process priority (niceness) to 10. You
+can use the -p or -P switches to modify this behavior.
+
+* Sometimes when you terminate Spinner it could leave the terminal in a 
+state you were not expecting (e.g. inverse video "stuck" on, cursor in
+the wrong spot, etc.) If you experience this a lot consider the -r switch.
+This will send a vt100 reset code at quit, which usually helps, but will
+clear your terminal screen. **NOTE: In version 1.2 the code was reworked 
+to all but eliminate this. If you encounter this issue, please send me an
+email with your system info.
+
+If your terminal gets stuck in an inconsistent (read "whacked") state you
+can try to fix it by running Spinner with the -R switch. With this switch
+ALL Spinner will do is sen a vt100 reset code to the tty (then quit).
+
+Using the -n switch will avoid these problem altogether by sending only
+null characters to the terminal. You loose the cool little spinner effect,
+however.
+
+* Verbose mode will walk you through most of the steps Spinner takes as it
+launches. Mainly for debugging, it can, however, help you troubleshoot 
+switch settings. Note that once Spinner has forked to the background it
+no longer has a controlling terminal and cannot output error messages.
+In or to see verbose output (or errors) after the fork you must use the
+-l switch and specify a filename to write to. This file will ONLY
+contain the output from Spinner AFTER the fork. Most likely you will
+never need this, but it is available if you do. Note that it t is
+perfectly normal to see a no such file or directory error in this log when
+logging out of linux. Linux cretaes and deletes files in /dev/pts/ with 
+every change of TTY.
+
+* Ghost in the Machine mode (i.e. using the -t switch to write to another
+tty other than your controlling terminal) can be both fun and (a little)
+useful. To use this mode determine the PATH to the tty you want Spinner
+to write. Usually the "tty" command will display your own terminal. This
+should give you the basic path/filename structure (usually "/dev/ttypXX"
+where "XX" is a number). Then do a "who" command to see which particular
+tty you want to write to. This will show you a list of logged in users
+and their ttys. Next run spinner with the -t switch and specify the path
+to the desired tty. Note that you must have permission to write to the
+desired tty. Ttys are setup to be owned by the user logged into them, and 
+usually setup with a group of "tty". So you can always write to any of 
+your own ttys. To write to someone else's tty you either need to be root,
+or root needs to setup Spinner as setgid (not setuid) "tty". There are
+security concerns with any setuid or setgid program. So don't be
+surprised if your administrator says no. Spinner has not been thoroughly
+audited for security. Though little could go wrong, small seemingly
+meaningless things can lead to real big security holes. You've been 
+warned. Spinner is NOT installed setgid (or setuid) by using the 
+"make install" command. Spinner will not run if it is made setuid.
+
+
+
+-------------
+TO DO
+-------------
+
+Allowing the user to specify the position of the spinning character
+might be fun, and somewhat useful.
+
+Perhaps putting the spinner into a banner at the top or bottom of the
+screen (like GNU screen's dividers) would be useful, as they spinner
+would not encroach into the active terminal area (the virtual terminal
+would be made smaller)
+
+Adding a spinner to the existing banner in the GNU screen program would
+be very useful for those who use screen.
+
+Calls to signal() should be replaced with sigaction() stuff.
+
+Any way to prevent scrollback of the spinner character instead of valid
+data would be useful (such as the banner at the bottom previously
+mentioned).
+
+Perhaps a switch to kill running Spinner(s) instead of using the kill
+command might be useful for novice users. However, novice users are
+unlikely to be using Spinner to begin with...
+
+-------------------------------
+Who Made This Thing? (and Why?)
+-------------------------------
+Original code:
+	Joe Laffey <software@laffeycomputer.com>
+	I made it to keep alive ssh connections that were being timed out by
+	my firewalls. Plus it looks cool, and was a nice experiment in
+	writing directly to ttys.
+
+Beta Testers:
+	Jonathan Dickmann <bob@bobarmadillo.com>
+	Michael Hostbaek <mich@freebsdcluster.org>
+	Patrick Norman <saitan@packetmonkeys.com>
+	Evlampy Oduvanchikoff <necro@netbastards.org>
+	Ed Okerson <eokerson@texasconnect.net>
+	
+Thank You!

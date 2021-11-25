@@ -1,0 +1,33 @@
+dnl
+dnl	spinner configure.in for automake v1.6
+dnl
+
+AC_INIT(spinner.c)
+AM_INIT_AUTOMAKE(spinner, 1.2.4)
+
+
+AC_PROG_CC
+
+
+dnl =================================================================
+dnl additional gcc flags
+dnl =================================================================
+dnl 
+
+if test "$GCC" = yes; then
+  CFLAGS="-pipe $CFLAGS"
+fi
+
+
+dnl =================================================================
+dnl Whether make sets $(MAKE)...
+dnl =================================================================
+AC_PROG_MAKE_SET
+
+AC_PROG_INSTALL
+
+AC_INLINE
+
+
+AC_OUTPUT(	Makefile )
+
